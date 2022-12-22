@@ -1,0 +1,61 @@
+# -*- mode: org; coding: utf-8 -*-
+#+TITLE: Org Publish Website Template
+#+AUTHOR: Phil Hwang
+#+EMAIL: pjhwang@gmail.com
+
+
+Org Mode에 추가되어 있는 [[https://orgmode.org/manual/Publishing.html][Publishing 기능]]을 활용하여 간단한 웹페이지를 생성하게 만들어주는 템플릿이다.
+
+* 시작 전 필요한 것들
+먼저 필요한 것은 =package= 를 이용하여 필요한 패키지를 지정하는 일이다.
+
+#+begin_src emacs-lisp
+  (require 'package)
+  (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                      (not (gnutls-available-p))))
+         (proto (if no-ssl "http" "https")))
+    (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+    )
+  (unless package--initialized (package-initialize t))
+#+end_src
+
+테스트용으로 사용할 간단한 httpd를 설치하고, =M-x httpd-serve-directory= 으로 실행시키면 된다.
+
+#+begin_src emacs-lisp
+  (unless (package-installed-p 'simple-httpd)
+    (package-refresh-contents)
+    (package-install 'simple-httpd))
+#+end_src
+
+
+* 본 기능 시작
+
+출판에 필요한 패키지는 =ox-publish= 인데, 최근 emacs 버전에는 기본적으로 포함되어 있다.
+
+#+begin_src emacs-lisp
+  (require 'ox-publish)
+#+end_src
+  
+
+출판기능은 ~org-publish-project-alist~ 변수에 필요한 거의 모든 것을 설정할 수 있다.
+
+#+begin_src emacs-lisp
+  ;; Define the publishing project
+  (setq org-publish-project-alist
+        (list 
+         (list "org-template-site"
+               :recursive t
+               :base-directory "./content"
+               :publishing-directory "./public"
+               :publishing-function 'org-html-publish-to-html)))
+
+  ;; Generate the site output
+  (org-publish-all t)
+
+  (message "Build complete!")
+#+end_src
+
+
+* 참고 자료
+
+- [[https://systemcrafters.net/publishing-websites-with-org-mode/building-the-site/][Build Your Website with Org Mode]]
